@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.example.doodling.widget.BoardView
+                android:id="@+id/board_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/ll_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:gravity="left">
+
+                <ImageButton
+                    android:id="@+id/tv_history"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/picture_history" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/picName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="3dp"
+                android:layout_toRightOf="@+id/ll_history"
+                android:textColor="@color/red"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:id="@+id/top_set"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/draw_btn"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/pen" />
+
+                <ImageButton
+                    android:id="@+id/erase_btn"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="right"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/a_eraser" />
+
+                <ImageButton
+                    android:id="@+id/type"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:text="@string/type"
+                    android:visibility="gone" />
+
+                <ImageButton
+                    android:id="@+id/black"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/black" />
+
+                <ImageButton
+                    android:id="@+id/red"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/red" />
+
+                <ImageButton
+                    android:id="@+id/blue"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/blue" />
+
+                <ImageButton
+                    android:id="@+id/small"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/thin" />
+
+                <ImageButton
+                    android:id="@+id/large"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/wide" />
+
+                <ImageButton
+                    android:id="@+id/reset"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/clear" />
+
+
+                <ImageButton
+                    android:id="@+id/save"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/saved" />
+
+                <ImageButton
+                    android:id="@+id/new_file"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/new_file" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/left_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:background="@color/white">
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:hint="搜索"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/search" />
+
+        <ListView
+            android:id="@+id/listView_items"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/search"
+            android:layout_toRightOf="@+id/search"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+</android.support.v4.widget.DrawerLayout>

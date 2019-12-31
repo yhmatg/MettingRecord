@@ -147,7 +147,22 @@
                     android:layout_marginEnd="5dp"
                     android:background="@drawable/doodle_btn_effect_round"
                     android:src="@drawable/saved" />
-
+                <ImageButton
+                    android:id="@+id/sharenetdisk"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/ic_cloud_upload_black_24dp" />
+                <ImageButton
+                    android:id="@+id/sharewchat"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/doodle_btn_effect_round"
+                    android:src="@drawable/ic_people_black_24dp" />
                 <ImageButton
                     android:id="@+id/new_file"
                     android:layout_width="35dp"

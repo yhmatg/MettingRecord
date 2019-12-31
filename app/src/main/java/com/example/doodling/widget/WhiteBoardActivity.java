@@ -1,5 +1,7 @@
 package com.example.doodling.widget;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -35,12 +37,18 @@ import com.example.doodling.R;
 import com.example.doodling.View.DrawingGroupAdapter;
 import com.example.doodling.View.GroupDrawing;
 import com.example.doodling.View.MyAdapter;
+import com.example.doodling.androidutils.AppUtils;
+import com.example.doodling.androidutils.ImageUtils;
+import com.example.doodling.androidutils.ToastUtils;
 import com.example.doodling.paintType.ActionType;
 import com.example.doodling.View.Drawing;
 import com.example.doodling.View.DrawingView;
+import com.example.doodling.utils.FileUtils;
+import com.example.doodling.utils.ShareUtils;
 import com.example.doodling.widget.shape.DrawShape;
 import com.example.doodling.widget.shape.Type;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -57,7 +65,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class WhiteBoardActivity extends AppCompatActivity {
-
+    public static final String PACKAGE_BAIDU_DISK = "com.baidu.netdisk";
+    public static final String PACKAGE_WECHAT = "com.tencent.mm";
     @BindView(R.id.drawer)
     DrawerLayout drawer;
     @BindView(R.id.tv_history)
@@ -109,6 +118,8 @@ public class WhiteBoardActivity extends AppCompatActivity {
     private AlertDialog saveImageDialog;
     private AlertDialog newFileDialog;
     private AlertDialog clearDialog;
+    private AlertDialog insNetDiskDialog;
+    private AlertDialog insWchatDialog;
     private MyAdapter adapter;
     Cursor cursor;
     private Bitmap mBitmap;
@@ -305,7 +316,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
     }
 
     //2019-10-31-modify
-    @OnClick({R.id.draw_btn, R.id.erase_btn, R.id.black, R.id.red, R.id.blue, R.id.small, R.id.large, R.id.reset, R.id.save, R.id.search, R.id.left_view, R.id.tv_history, R.id.new_file})
+    @OnClick({R.id.draw_btn, R.id.erase_btn, R.id.black, R.id.red, R.id.blue, R.id.small, R.id.large, R.id.reset, R.id.save, R.id.search, R.id.left_view, R.id.tv_history, R.id.new_file,R.id.sharenetdisk,R.id.sharewchat})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.draw_btn:
@@ -333,12 +344,12 @@ public class WhiteBoardActivity extends AppCompatActivity {
                 break;
 
             case R.id.small:
-                DrawShape.mPaintWidth = 5;
+                DrawShape.mPaintWidth = 4;
                 small.setBackgroundResource(R.drawable.doodle_shape_circle_pressed);
                 large.setBackgroundResource(R.drawable.doodle_shape_circle_normal);
                 break;
             case R.id.large:
-                DrawShape.mPaintWidth = 10;
+                DrawShape.mPaintWidth = 8;
                 large.setBackgroundResource(R.drawable.doodle_shape_circle_pressed);
                 small.setBackgroundResource(R.drawable.doodle_shape_circle_normal);
                 break;
@@ -352,6 +363,12 @@ public class WhiteBoardActivity extends AppCompatActivity {
                 break;
             case R.id.save:
                 saveImage();
+                break;
+            case R.id.sharenetdisk:
+                saveAndShareToBaiduNetdisk();
+                break;
+            case R.id.sharewchat:
+                saveAndShareToWchat();
                 break;
             case R.id.new_file:
                 createNewFile();
@@ -630,7 +647,176 @@ public class WhiteBoardActivity extends AppCompatActivity {
         }
         saveImageDialog.show();
     }
+    /**
+     * 保存到百度云
+     *
+     */
+    public void saveAndShareToBaiduNetdisk() {
+        if (!AppUtils.isInstallApp(this, PACKAGE_BAIDU_DISK)) {
+            if (insNetDiskDialog == null) {
+                insNetDiskDialog = new AlertDialog.Builder(this)
+                        .setMessage("未能检测到百度网盘，请先安装百度网盘")
+                        .setPositiveButton("确定", null).create();
+            }
+            insNetDiskDialog.show();
+            return;
+        }
+        editText.setText(oldName);
+        if (!"".equals(oldName)) {
+            editText.setSelection(oldName.length());
+        }
+        if (saveImageDialog == null) {
+            saveImageDialog = new AlertDialog.Builder(this)
+                    .setTitle("请输入标题！")
+                    .setView(editText)
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            name = editText.getText().toString();
+                            if (name.isEmpty()) {
+                                showMessage("标题不能为空！");
+                            } else {
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                                Long saveTime = System.currentTimeMillis();
+                                Date date = new Date(saveTime);
+                                Bitmap bitmap = mBoardView.getDoodleBitmap();
+                                drawing.setName(name);
+                                drawing.setDate(simpleDateFormat.format(date));
+                                drawing.setDateTiem(saveTime);
+                                if (currentGroupId != 0) {
+                                    drawing.setGroupId(currentGroupId);
+                                } else {
+                                    drawing.setGroupId(saveTime);
+                                    currentGroupId = saveTime;
+                                }
+                                //内容保存到数据库
+                                dataBase.addDrawing(drawing, BitmapToBytes(bitmap));
+                                //列表选中状态清除
+                                groupAdapter.setDefSelect(-1);
+                                adapter.setDefSelect(-1);
+                                mItemListview.setVisibility(View.GONE);
+                                //更新标题
+                                oldName = name;
+                                picName.setText(name + "-" + simpleDateFormat.format(date));
+                                //更新数据库中新添加的内容
+                                update();
+                                shareToBaiduNetdisk(name);
+                            }
+                        }
+                    }).setNegativeButton("取消", null)
+                    .create();
 
+        }
+        saveImageDialog.show();
+    }
+    /**
+     * 保存到百度云
+     *
+     */
+    public void shareToBaiduNetdisk(String name) {
+        Bitmap bitmap = mBoardView.getDoodleBitmap();
+        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/doodleview/" + name+ ".png";
+        if (!new File(filePath).exists()) {
+            new File(filePath).getParentFile().mkdir();
+        }
+        FileOutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(filePath);
+            bitmap= ImageUtils.changeColor(bitmap);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ShareUtils.sharePictureToBaiduDisk(this,new File(filePath));
+    }
+    /**
+     * 保存到百度云
+     *
+     */
+    public void shareToWchat(String name) {
+        Bitmap bitmap = mBoardView.getDoodleBitmap();
+        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/doodleview/" + name+ ".png";
+        if (!new File(filePath).exists()) {
+            new File(filePath).getParentFile().mkdir();
+        }
+        FileOutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(filePath);
+            bitmap= ImageUtils.changeColor(bitmap);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ShareUtils.sharePictureToWechatFriend(this,new File(filePath));
+    }
+    /**
+     * 保存到百度云
+     *
+     */
+    public void saveAndShareToWchat() {
+        if (!AppUtils.isInstallApp(this, PACKAGE_WECHAT)) {
+            if (insWchatDialog == null) {
+                insWchatDialog = new AlertDialog.Builder(this)
+                        .setMessage("未能检测到微信，请先安装微信")
+                        .setPositiveButton("确定", null).create();
+            }
+            insWchatDialog.show();
+            return;
+        }
+        editText.setText(oldName);
+        if (!"".equals(oldName)) {
+            editText.setSelection(oldName.length());
+        }
+        if (saveImageDialog == null) {
+            saveImageDialog = new AlertDialog.Builder(this)
+                    .setTitle("请输入标题！")
+                    .setView(editText)
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            name = editText.getText().toString();
+                            if (name.isEmpty()) {
+                                showMessage("标题不能为空！");
+                            } else {
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                                Long saveTime = System.currentTimeMillis();
+                                Date date = new Date(saveTime);
+                                Bitmap bitmap = mBoardView.getDoodleBitmap();
+                                drawing.setName(name);
+                                drawing.setDate(simpleDateFormat.format(date));
+                                drawing.setDateTiem(saveTime);
+                                if (currentGroupId != 0) {
+                                    drawing.setGroupId(currentGroupId);
+                                } else {
+                                    drawing.setGroupId(saveTime);
+                                    currentGroupId = saveTime;
+                                }
+                                //内容保存到数据库
+                                dataBase.addDrawing(drawing, BitmapToBytes(bitmap));
+                                //列表选中状态清除
+                                groupAdapter.setDefSelect(-1);
+                                adapter.setDefSelect(-1);
+                                mItemListview.setVisibility(View.GONE);
+                                //更新标题
+                                oldName = name;
+                                picName.setText(name + "-" + simpleDateFormat.format(date));
+                                //更新数据库中新添加的内容
+                                update();
+                                shareToBaiduNetdisk(name);
+                            }
+                        }
+                    }).setNegativeButton("取消", null)
+                    .create();
+
+        }
+        saveImageDialog.show();
+    }
     private void showMessage(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
